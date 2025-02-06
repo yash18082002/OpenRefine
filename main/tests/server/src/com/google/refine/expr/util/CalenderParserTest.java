@@ -280,20 +280,23 @@ public class CalenderParserTest {
 
     @DataProvider(name = "validLeapYearDates")
     private static Object[][] validLeapYearDates() {
-        return new Object[][] {
-            { "29/02/2024", CalendarParser.DD_MM_YY },  // Valid leap year date (2024 is a leap year)
-            // { "29-02-2012", CalendarParser.DD_MM_YY },  // Valid leap year date (2012 is a leap year)
-            // { "29/02/2020", CalendarParser.DD_MM_YY },  // Valid leap year date (2000 is a leap year)
-            // { "29-02-2016", CalendarParser.DD_MM_YY }   // Valid leap year date (2016 is a leap year)
-        };
+        List<Object[]> leapYearDates = new ArrayList<>();
+        // generate test cases for leap years (every 4th year, starting from 1904 to 2096)
+        for (int year = 1904; year <= 2096; year += 4) {
+            // we assume the date is "29/02/YYYY" and the order is DD_MM_YY
+            leapYearDates.add(new Object[]{ "29/02/" + year, CalendarParser.DD_MM_YY });
+        }
+        return leapYearDates.toArray(new Object[0][]);  // Convert list to Object[][] for the DataProvider
     }
 
     @Test(dataProvider = "validLeapYearDates")
     public void shouldParseValidLeapYearDate_parseTest(String dateInput, int orderInput) throws CalendarParserException {
         Calendar calendar = CalendarParser.parse(dateInput, orderInput);
-        assertEquals(2024, calendar.get(Calendar.YEAR));
-        assertEquals(1, calendar.get(Calendar.MONTH));  // February (0-indexed)
-        assertEquals(29, calendar.get(Calendar.DATE));
+        // Extract the year from the input date
+        int expectedYear = Integer.parseInt(dateInput.substring(6, 10));
+        assertEquals(calendar.get(Calendar.YEAR), expectedYear);  // Verify that the correct year is parsed
+        assertEquals(calendar.get(Calendar.MONTH), Calendar.FEBRUARY);  // February (0-indexed)
+        assertEquals(calendar.get(Calendar.DATE), 29);  // February 29th
     }
 
     private static Calendar getCalendar(int year, int month, int date, int hour, int minutes, int seconds, int milliSeconds,
