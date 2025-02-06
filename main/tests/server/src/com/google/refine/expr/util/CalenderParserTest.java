@@ -278,6 +278,24 @@ public class CalenderParserTest {
         CalendarParser.parse(dateStr, CalendarParser.YY_DD_MM);
     }
 
+    @DataProvider(name = "validLeapYearDates")
+    private static Object[][] validLeapYearDates() {
+        return new Object[][] {
+            { "29/02/2024", CalendarParser.DD_MM_YY },  // Valid leap year date (2024 is a leap year)
+            // { "29-02-2012", CalendarParser.DD_MM_YY },  // Valid leap year date (2012 is a leap year)
+            // { "29/02/2020", CalendarParser.DD_MM_YY },  // Valid leap year date (2000 is a leap year)
+            // { "29-02-2016", CalendarParser.DD_MM_YY }   // Valid leap year date (2016 is a leap year)
+        };
+    }
+
+    @Test(dataProvider = "validLeapYearDates")
+    public void shouldParseValidLeapYearDate_parseTest(String dateInput, int orderInput) throws CalendarParserException {
+        Calendar calendar = CalendarParser.parse(dateInput, orderInput);
+        assertEquals(2024, calendar.get(Calendar.YEAR));
+        assertEquals(1, calendar.get(Calendar.MONTH));  // February (0-indexed)
+        assertEquals(29, calendar.get(Calendar.DATE));
+    }
+
     private static Calendar getCalendar(int year, int month, int date, int hour, int minutes, int seconds, int milliSeconds,
             TimeZone timeZone) {
         Calendar cal = Calendar.getInstance();
