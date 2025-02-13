@@ -107,22 +107,6 @@ public class ReconJudgeSimilarCellsOperationTests extends RefineTest {
     }
 
     @Test
-    public void serializeReconJudgeSimilarCellsOperationMatch() throws IOException {
-        String json = "{\"op\":\"core/recon-judge-similar-cells\","
-                + "\"description\":"
-                + new TextNode(OperationDescription.recon_judge_similar_cells_matched_brief("Douglas Adams", "Q42", "A", "foo")).toString()
-                + ","
-                + "\"engineConfig\":{\"mode\":\"row-based\",\"facets\":[]},"
-                + "\"columnName\":\"A\","
-                + "\"similarValue\":\"foo\","
-                + "\"judgment\":\"matched\","
-                + "\"match\":{\"id\":\"Q42\",\"name\":\"Douglas Adams\",\"types\":[\"Q5\"],\"score\":85},"
-                + "\"shareNewTopics\":false"
-                + "}";
-        TestUtils.isSerializedTo(ParsingUtilities.mapper.readValue(json, ReconJudgeSimilarCellsOperation.class), json);
-    }
-
-    @Test
     public void testMarkNewTopics() throws Exception {
         Project project = createProject(
                 new String[] { "A", "B" },

@@ -340,4 +340,44 @@ public class GrelTests extends GrelTestBase {
         Assert.assertEquals(evaluable.getSource(), "value + \" foo\"");
         Assert.assertEquals(evaluable.getLanguagePrefix(), "grel");
     }
+
+    @Test
+    public void testFiniteStateExpressionEntryAndExecution() throws ParsingException {
+        // Expression entry: valid expression
+        Evaluable eval = MetaParser.parse("grel:value.toUppercase()");
+        // Simulate execution on a cell by setting the binding "value"
+        bindings.put("value", "hello");
+        Object result = eval.evaluate(bindings);
+        Assert.assertEquals(result, "HELLO", "Expression should correctly transform input value");
+    }
+
+    /**
+     * Simulate the Syntax Validation state:
+     * An invalid expression should throw a ParsingException.
+     */
+    @Test
+    public void testFiniteStateSyntaxValidationInvalid() {
+        try {
+            MetaParser.parse("grel:value.toUppercase(");
+            fail("Parsing should have thrown an exception for invalid syntax");
+        } catch (ParsingException e) {
+            Assert.assertTrue(e.getMessage().contains("Missing"), "Error message should indicate missing syntax elements");
+        }
+    }
+
+    /**
+     * Simulate the Preview state:
+     * Evaluate a valid expression on a set of sample values and verify the expected preview output.
+     */
+    @Test
+    public void testFiniteStatePreview() throws ParsingException {
+        Evaluable eval = MetaParser.parse("grel:value.toUppercase()");
+        String[] inputs = {"hello", "world"};
+        String[] expected = {"HELLO", "WORLD"};
+        for (int i = 0; i < inputs.length; i++) {
+            bindings.put("value", inputs[i]);
+            Object result = eval.evaluate(bindings);
+            Assert.assertEquals(result, expected[i], "Preview transformation should match expected output");
+        }
+    }
 }
