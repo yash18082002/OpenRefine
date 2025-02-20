@@ -380,4 +380,157 @@ public class GrelTests extends GrelTestBase {
             Assert.assertEquals(result, expected[i], "Preview transformation should match expected output");
         }
     }
+
+    @Test
+    public void testBooleanOperations() throws ParsingException {
+        String[][] tests = {
+                {"true", "true"},
+                {"false", "false"},
+        };
+
+        for (String[] test : tests) {
+            // Assuming parseEval takes an expression and expected result
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testArrayOperations() throws ParsingException {
+        String[][] tests = {
+                { "[1, 2, 3].length()", "3" },
+                { "[].length()", "0" },
+                { "[1.5, 2.5, 3.5].sum()", "7.5" },
+                { "[1, 2, 3].join(',')", "1,2,3" },
+                { "[].join(',')", "" },
+                { "[1, 2, 3].get(0)", "1" },
+                { "[1, 2, 3][1]", "2" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testMathEdgeCases() throws ParsingException {
+        String tests[][] = {
+                { "1/0", "Infinity" },
+                { "-1/0", "-Infinity" },
+                { "0/0", "NaN" },
+                { "0.0/0.0", "NaN" },
+                { "1.0/0.0", "Infinity" },
+                { "-1.0/0.0", "-Infinity" },
+                { "1/0.0", "Infinity" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testDateComparisons() throws ParsingException {
+        String tests[][] = {
+                { "'2020-01-01'.toDate() == '2020-01-01'.toDate()", "true" },
+                { "'2020-01-01'.toDate() != '2020-01-02'.toDate()", "true" },
+                { "'2020-01-01'.toDate() < '2021-01-01'.toDate()", "true" },
+                { "'2020-01-01'.toDate() <= '2021-01-01'.toDate()", "true" },
+                { "'2020-01-01'.toDate() > '2019-01-01'.toDate()", "true" },
+                { "'2020-01-01'.toDate() >= '2020-01-01'.toDate()", "true" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testStringConcatenation() throws ParsingException {
+        String tests[][] = {
+                { "'Hello' + ' ' + 'World'", "Hello World" },
+                { "'Foo' + 'Bar' + 'Baz'", "FooBarBaz" },
+                { "'Special' + '\\n' + 'Character'", "Special\nCharacter" },
+                { "'Escaped quotes: ' + '\"Test\"'", "Escaped quotes: \"Test\"" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testDivisionByZero() throws ParsingException {
+        String tests[][] = {
+                { "1/0", "Infinity" },
+                { "-1/0", "-Infinity" },
+                { "0/0", "NaN" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testNullHandling() throws ParsingException {
+        String[][] tests = {
+                { "null == null", "true" },
+                { "null != null", "false" },
+                { "isNull(null)", "true" },
+                { "isNull(\"\")", "false" },
+                { "isNull(0)", "false" },
+                { "isBlank(null)", "true" },
+                { "isBlank(\"\")", "true" },
+                { "isBlank(\"text\")", "false" },
+                { "isNonBlank(null)", "false" },
+                { "isNonBlank(\"text\")", "true" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testStringFunctions() throws ParsingException {
+        String tests[][] = {
+                { "\"hello\".length()", "5" },
+                { "\"\".length()", "0" },
+                { "\"hello\".toUppercase()", "HELLO" },
+                { "\"HELLO\".toLowercase()", "hello" },
+                { "\" hello \".trim()", "hello" },
+                { "\"hello\".substring(1, 4)", "ell" },
+                { "\"hello\".indexOf(\"l\")", "2" },
+                { "\"hello\".lastIndexOf(\"l\")", "3" },
+                { "\"hello\".startsWith(\"he\")", "true" },
+                { "\"hello\".endsWith(\"lo\")", "true" },
+                { "\"hello\".replace(\"l\", \"L\")", "heLLo" },
+                { "\"hello\".replaceChars(\"hl\", \"HL\")", "HeLLo" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testTypeConversions() throws ParsingException {
+        String tests[][] = {
+                { "\"123\".toNumber()", "123" },
+                { "\"123.456\".toNumber()", "123.456" },
+                { "toString(null)", "" },
+                { "toString(123)", "123" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
+
+    @Test
+    public void testComplexExpressions() throws ParsingException {
+        String tests[][] = {
+                { "with(3, x, with(4, y, x + y))", "7" },
+                { "if(true, 1, 2)", "1" },
+                { "if(false, 1, 2)", "2" },
+                { "if(null, 1, 2)", "2" },
+                { "if(3 > 2, \"yes\", \"no\")", "yes" },
+                { "if(isNonBlank(null), \"yes\", \"no\")", "no" },
+        };
+        for (String[] test : tests) {
+            parseEval(bindings, test);
+        }
+    }
 }
