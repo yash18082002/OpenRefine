@@ -70,7 +70,7 @@ public class Project {
 
     final public long id;
     final public List<Row> rows = new ArrayList<>();
-    final public ColumnModel columnModel = new ColumnModel();
+    public ColumnModel columnModel = new ColumnModel();
     final public RecordModel recordModel = new RecordModel();
     final public Map<String, OverlayModel> overlayModels = new HashMap<String, OverlayModel>();
     final public History history;

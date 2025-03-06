@@ -34,6 +34,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.google.refine.operations.cell;
 
 import static org.testng.Assert.assertThrows;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import java.io.Serializable;
 
@@ -43,10 +55,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.mockito.Mock;
 
 import com.google.refine.RefineTest;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Project;
+import com.google.refine.model.Row;
+import com.google.refine.history.HistoryEntry;
+import com.google.refine.model.Column;
+import com.google.refine.model.ColumnModel;
 import com.google.refine.operations.OperationDescription;
 import com.google.refine.operations.OperationRegistry;
 import com.google.refine.util.ParsingUtilities;
@@ -176,6 +193,58 @@ public class MultiValuedCellJoinOperationTests extends RefineTest {
                 });
 
         assertProjectEquals(projectWithRecords, expected);
+    }
+
+    @Test
+    public void testProjectField() {
+        Project project = new Project();
+        MultiValuedCellJoinOperation operation = new MultiValuedCellJoinOperation("Value", "Key", ",", project);
+        Project storedProject = operation.getProject();
+        assertEquals(storedProject, project);
+    }
+
+    @Test
+    public void testExtractedMethod() {
+        MultiValuedCellJoinOperation operation = new MultiValuedCellJoinOperation("Value", "Key", ",", null);
+        Project project = new Project();
+        List<Row> newRows = operation.generateNewRows(project, 0, 1);
+        assertEquals(newRows.size(), 0); // Assuming the logic would not add any rows without valid data
+    }
+
+    @Test
+    public void testConstructorOverload() {
+        MultiValuedCellJoinOperation operation = new MultiValuedCellJoinOperation("Value", "Key", ",", null);
+        assertNotNull(operation);
+    }
+
+    @Test
+    public void testCreateHistoryEntry() throws Exception {
+        Project project = new Project();
+        ColumnModel columnModel = project.columnModel;
+        Column valueColumn = new Column(0, "Value");
+        Column keyColumn = new Column(1, "Key");
+        columnModel.addColumn(0, valueColumn, true);
+        columnModel.addColumn(1, keyColumn, true);
+        MultiValuedCellJoinOperation operation = new MultiValuedCellJoinOperation("Value", "Key", ",", project);
+        HistoryEntry historyEntry = operation.createHistoryEntry(1L);
+        assertNotNull(historyEntry);
+    }
+
+    @Test
+    public void mockito() throws Exception {
+        Project project = new Project();
+        Project projectSpy = spy(project);
+        ColumnModel realColumnModel = new ColumnModel();
+        ColumnModel columnModelSpy = spy(realColumnModel);
+        when(columnModelSpy.getColumnByName("Value")).thenReturn(new Column(
+                0, "Value"));
+        when(columnModelSpy.getColumnByName("Key")).thenReturn(new Column(
+                1, "Key"));
+        projectSpy.columnModel = columnModelSpy;
+        MultiValuedCellJoinOperation operation = new MultiValuedCellJoinOperation(
+                "Value", "Key", ",", projectSpy);
+        HistoryEntry historyEntry = operation.createHistoryEntry(1L);
+        assertEquals(true, historyEntry != null);
     }
 
 }
